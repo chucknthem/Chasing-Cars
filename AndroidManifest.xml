@@ -26,6 +26,10 @@
         <activity android:name=".BluetoothChat"
                   android:label="@string/app_name"
                   android:configChanges="orientation|keyboardHidden">
+        </activity>
+        <activity android:name="HomePage"
+                  android:label="@string/app_name"
+                  android:configChanges="orientation|keyboardHidden">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

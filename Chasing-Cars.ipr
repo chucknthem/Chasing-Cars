@@ -226,6 +226,13 @@
       </item>
     </group>
   </component>
+  <component name="ProjectDictionaryState">
+    <dictionary name="prashant">
+      <words>
+        <w>bluetooth</w>
+      </words>
+    </dictionary>
+  </component>
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/Chasing-Cars.iml" filepath="$PROJECT_DIR$/Chasing-Cars.iml" />
