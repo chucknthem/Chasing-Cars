@@ -38,6 +38,7 @@
         </ADDITIONAL_INDENT_OPTIONS>
       </value>
     </option>
+  </component>
   <component name="CompilerConfiguration">
     <option name="DEFAULT_COMPILER" value="Javac" />
     <resourceExtensions />
