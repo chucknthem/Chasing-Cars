@@ -3,6 +3,23 @@
   <component name="AntConfiguration">
     <defaultAnt bundledAnt="true" />
   </component>
+  <component name="ArtifactManager">
+    <artifact type="jar" build-on-make="true" name="andengine:jar">
+      <output-path>$PROJECT_DIR$/libs</output-path>
+      <root id="archive" name="andengine.jar">
+        <element id="module-output" name="andengine" />
+        <element id="directory" name="META-INF">
+          <element id="file-copy" path="$PROJECT_DIR$/META-INF/MANIFEST.MF" />
+        </element>
+      </root>
+    </artifact>
+    <artifact type="jar" build-on-make="true" name="andenginephysicsbox2dextension:jar">
+      <output-path>$PROJECT_DIR$/libs</output-path>
+      <root id="archive" name="andenginephysicsbox2dextension.jar">
+        <element id="module-output" name="andenginephysicsbox2dextension" />
+      </root>
+    </artifact>
+  </component>
   <component name="CodeStyleSettingsManager">
     <option name="PER_PROJECT_SETTINGS">
       <value>
@@ -70,10 +87,14 @@
     <autodetection-disabled>
       <facet-type id="android">
         <modules>
-          <module name="untitled">
+          <module name="andengine">
             <files>
-              <file url="file://$PROJECT_DIR$/../andengine/untitled/AndroidManifest.xml" />
-              <file url="file://$PROJECT_DIR$/untitled/AndroidManifest.xml" />
+              <file url="file://$PROJECT_DIR$/../andengine/AndroidManifest.xml" />
+            </files>
+          </module>
+          <module name="andenginephysicsbox2dextension">
+            <files>
+              <file url="file://$PROJECT_DIR$/../andenginephysicsbox2dextension/AndroidManifest.xml" />
             </files>
           </module>
         </modules>
@@ -243,7 +264,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/Chasing-Cars.iml" filepath="$PROJECT_DIR$/Chasing-Cars.iml" />
-      <module fileurl="file://$PROJECT_DIR$/../andengine/andengine.iml" filepath="$PROJECT_DIR$/../andengine/andengine.iml" />
     </modules>
   </component>
   <component name="ProjectResources">
@@ -254,6 +274,16 @@
   </component>
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="Git" />
+  </component>
+  <component name="libraryTable">
+    <library name="AndEngine">
+      <CLASSES>
+        <root url="file://$PROJECT_DIR$/libs" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES />
+      <jarDirectory url="file://$PROJECT_DIR$/libs" recursive="false" />
+    </library>
   </component>
 </project>
 
