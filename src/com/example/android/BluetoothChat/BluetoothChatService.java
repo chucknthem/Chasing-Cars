@@ -19,7 +19,8 @@ package com.example.android.BluetoothChat;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.UUID;
+import java.lang.reflect.Array;
+import java.util.*;
 
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
@@ -75,6 +76,11 @@ public class BluetoothChatService {
     public static final int STATE_LISTEN = 1;     // now listening for incoming connections
     public static final int STATE_CONNECTING = 2; // now initiating an outgoing connection
     public static final int STATE_CONNECTED = 3;  // now connected to a remote device
+    public static final int STATE_DISCONNECTED = 4; // disconnected
+
+    // Constants for message types
+    public static final int MESSAGE_STATECHANGE = 1;
+    public static final int MESSAGE_READ = 2;
 
     /**
      * Constructor. Prepares a new BluetoothChat session.
@@ -101,6 +107,7 @@ public class BluetoothChatService {
 
     public void setupServer() {
         ensureDiscoverable();
+        setState(STATE_LISTEN);
 
         if (serverListenThread != null) {
             serverListenThread.cancel();
@@ -112,7 +119,9 @@ public class BluetoothChatService {
 
 
     public void setupClient(BluetoothDevice device) {
-        // we try to connect to each of the UUIDs
+        // we try to connect to each of the UUID
+        setState(STATE_CONNECTING);
+        
         if (clientThread != null) {
             clientThread.cancel();
             clientThread = null;
@@ -133,7 +142,7 @@ public class BluetoothChatService {
         mState = state;
 
         // Give the new state to the Handler so the UI Activity can update
-        mHandler.obtainMessage(BluetoothChat.MESSAGE_STATE_CHANGE, state, -1).sendToTarget();
+        mHandler.obtainMessage(MESSAGE_STATECHANGE, state, -1).sendToTarget();
     }
 
     /**
@@ -223,11 +232,7 @@ public class BluetoothChatService {
      */
     private void connectionFailed() {
         // Send a failure message back to the Activity
-        Message msg = mHandler.obtainMessage(BluetoothChat.MESSAGE_TOAST);
-        Bundle bundle = new Bundle();
-        bundle.putString(BluetoothChat.TOAST, "Unable to connect device");
-        msg.setData(bundle);
-        mHandler.sendMessage(msg);
+        setState(STATE_DISCONNECTED);
     }
 
     /**
@@ -235,11 +240,7 @@ public class BluetoothChatService {
      */
     private void connectionLost() {
         // Send a failure message back to the Activity
-        Message msg = mHandler.obtainMessage(BluetoothChat.MESSAGE_TOAST);
-        Bundle bundle = new Bundle();
-        bundle.putString(BluetoothChat.TOAST, "Device connection was lost");
-        msg.setData(bundle);
-        mHandler.sendMessage(msg);
+        setState(STATE_DISCONNECTED);
     }
 
     private void serverSendToAll(byte[] buffer, int numBytes, int fromClient) {
@@ -332,8 +333,10 @@ public class BluetoothChatService {
                 int retryCount = 100;
                 for(int j = 0; j < retryCount; j++) {
                     for(int i = 0; i < MY_UUIDS.length; i++) {
-                        if(D) Log.w(TAG, "ClientThread attempting create socket for UUID: " + MY_UUIDS[i]);
-                        mmSocket = mDevice.createInsecureRfcommSocketToServiceRecord(MY_UUIDS[i]);
+                        UUID uuid = MY_UUIDS[i];
+
+                        if(D) Log.w(TAG, "ClientThread attempting create socket for UUID: " + uuid);
+                        mmSocket = mDevice.createInsecureRfcommSocketToServiceRecord(uuid);
 
                         try {
                             if (D) Log.d(TAG, "Trying to connect to the above UUID");
@@ -355,11 +358,11 @@ public class BluetoothChatService {
                                 Log.e(TAG, "unable to close() socket during connection failure", e2);
                             }
                         }
-                        Thread.sleep(1000);
+                        Thread.sleep(300);
                     }
 
                     Log.w(TAG, "MYUID loop iteration over, trying again. Upto iteration " + j + " out of " + retryCount);
-                    Thread.sleep(2000);
+                    Thread.sleep(1000);
                 }
 
                 connectionFailed();
@@ -427,7 +430,7 @@ public class BluetoothChatService {
                     }
 
                     // Send the obtained bytes to the UI Activity
-                    mHandler.obtainMessage(BluetoothChat.MESSAGE_READ, bytes, -1, buffer)
+                    mHandler.obtainMessage(MESSAGE_READ, bytes, -1, buffer)
                             .sendToTarget();
                 } catch (IOException e) {
                     Log.e(TAG, "disconnected", e);
