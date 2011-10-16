@@ -1,43 +1,28 @@
 package com.hackathon.chasingcars;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 import android.util.Log;
 import android.view.MotionEvent;
-import android.view.View;
+import com.hackathon.chasingcars.entity.Coin;
 import com.hackathon.chasingcars.entity.Player;
 import org.anddev.andengine.engine.Engine;
-import org.anddev.andengine.engine.camera.Camera;
 import org.anddev.andengine.engine.camera.SmoothCamera;
 import org.anddev.andengine.engine.handler.IUpdateHandler;
 import org.anddev.andengine.engine.options.EngineOptions;
 import org.anddev.andengine.engine.options.EngineOptions.ScreenOrientation;
 import org.anddev.andengine.engine.options.resolutionpolicy.RatioResolutionPolicy;
-import org.anddev.andengine.entity.primitive.Line;
-import org.anddev.andengine.entity.primitive.Rectangle;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.scene.background.ColorBackground;
 import org.anddev.andengine.entity.scene.background.RepeatingSpriteBackground;
-import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.entity.util.FPSLogger;
 import org.anddev.andengine.input.touch.TouchEvent;
 import org.anddev.andengine.opengl.texture.TextureManager;
 import org.anddev.andengine.opengl.texture.TextureOptions;
 import org.anddev.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas;
-import org.anddev.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlasTextureRegionFactory;
 import org.anddev.andengine.opengl.texture.atlas.bitmap.source.AssetBitmapTextureAtlasSource;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
-import org.anddev.andengine.opengl.texture.region.TextureRegionFactory;
 import org.anddev.andengine.opengl.texture.region.TiledTextureRegion;
 
-/**
- * (c) 2010 Nicolas Gramlich
- * (c) 2011 Zynga Inc.
- *
- * @author Nicolas Gramlich
- * @since 11:54:51 - 03.04.2010
- */
 public class Game extends BaseChasingCarActivity implements Scene.IOnSceneTouchListener, IUpdateHandler {
     // ===========================================================
     // Constants
@@ -58,7 +43,7 @@ public class Game extends BaseChasingCarActivity implements Scene.IOnSceneTouchL
     private static final float CAM_MAX_VELOCITY_Y = 350f;
     private static final float CAM_ZOOM_FACTOR = 5f;
     
-    private static final int LINE_COUNT = 100;
+    private static final float COIN_COUNT = 500;
 
     private static final int BG_RED = 1;
     private static final int BG_GREEN = 1;
@@ -75,6 +60,8 @@ public class Game extends BaseChasingCarActivity implements Scene.IOnSceneTouchL
     private SmoothCamera mCamera;
 
     private List<Player> mPlayers = new LinkedList<Player>();
+
+    private List<Coin> mCoins = new LinkedList<Coin>();
 
     private Player mThisPlayer;
 
@@ -136,6 +123,22 @@ public class Game extends BaseChasingCarActivity implements Scene.IOnSceneTouchL
 
         mPlayers.add(mThisPlayer);
 
+        /// Randomly distribute some coins.
+        Random rGen = new Random(RANDOM_SEED);
+        for (int i = 0; i < COIN_COUNT; i++) {
+            float x = rGen.nextFloat() * MAP_WIDTH;
+            float y = rGen.nextFloat() * MAP_HEIGHT;
+            Coin coin = new Coin(x, y);
+            scene.attachChild(coin);
+            mCoins.add(coin);
+        }
+
+        Collections.sort(mCoins, new Comparator<Coin>() {
+            @Override
+            public int compare(Coin coin1, Coin coin2) {
+                return (int) (coin1.getX() - coin2.getX());
+            }
+        });
         scene.registerUpdateHandler(this);
         // Register activity to handle touch events.
         scene.setOnSceneTouchListener(this);

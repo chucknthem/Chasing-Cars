@@ -3,15 +3,7 @@ package com.hackathon.chasingcars.entity;
 import android.util.Log;
 import org.anddev.andengine.engine.handler.IUpdateHandler;
 import org.anddev.andengine.entity.primitive.Rectangle;
-import org.apache.http.client.RedirectException;
 
-/**
- * Created by IntelliJ IDEA.
- * User: charlesma
- * Date: 10/15/11
- * Time: 2:06 PM
- * To change this template use File | Settings | File Templates.
- */
 public class Player extends Rectangle implements IUpdateHandler {
 
     private static final float PLAYER_WIDTH = 40f;
@@ -21,7 +13,7 @@ public class Player extends Rectangle implements IUpdateHandler {
     private static final float PLAYER_ACCELERATION = .05f;
 
     public static final float PLAYER_MAX_VELOCITY = 400;
-    
+
     public static enum COLOR {
         RED,
         BLUE,
@@ -30,8 +22,9 @@ public class Player extends Rectangle implements IUpdateHandler {
         BLACK
     }
 
-    private String name;
-    private String id;
+    private int mCoinCount = 0;
+    private String mName;
+    private String mId;
    
     private double mDirection = 0; // Radians.
     private float mVelocity = 0;
@@ -39,8 +32,8 @@ public class Player extends Rectangle implements IUpdateHandler {
     public Player(String name, String id,  final float startX, final float startY) {
         super(startX, startY, PLAYER_WIDTH, PLAYER_HEIGHT);
  
-        this.id = id;
-        this.name = name;
+        mId = id;
+        mName = name;
     }
 
     public void setColor(COLOR color) {
