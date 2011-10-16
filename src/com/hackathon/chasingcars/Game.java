@@ -5,6 +5,7 @@ import android.util.Log;
 import android.view.MotionEvent;
 import com.hackathon.chasingcars.entity.Coin;
 import com.hackathon.chasingcars.entity.Player;
+import org.anddev.andengine.collision.RectangularShapeCollisionChecker;
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.camera.SmoothCamera;
 import org.anddev.andengine.engine.handler.IUpdateHandler;
@@ -66,6 +67,8 @@ public class Game extends BaseChasingCarActivity implements Scene.IOnSceneTouchL
     private Player mThisPlayer;
 
     private boolean mIsAccelerating = false;
+
+
 
     // Touch
     private float mTouchX, mTouchY, mTouchOffsetX, mTouchOffsetY;
@@ -140,6 +143,7 @@ public class Game extends BaseChasingCarActivity implements Scene.IOnSceneTouchL
             }
         });
         scene.registerUpdateHandler(this);
+
         // Register activity to handle touch events.
         scene.setOnSceneTouchListener(this);
 
@@ -187,11 +191,27 @@ public class Game extends BaseChasingCarActivity implements Scene.IOnSceneTouchL
         if (mIsAccelerating) {
             float aX = mTouchX - mThisPlayer.getX();
             float aY = mTouchY - mThisPlayer.getY();
-            Log.w("Touch", mTouchX + " " + mTouchY);
-            Log.w("Player", mThisPlayer.getX() + " " + mThisPlayer.getY());
-            Log.w("Accelerate", aX + " " + aY);
 
             mThisPlayer.accelerate(aX, aY);
+        }
+
+        List<Coin> toRemove = new ArrayList<Coin>();
+        for (Coin coin : mCoins) {
+            float dx = coin.getX() - mThisPlayer.getX();
+            float dy = coin.getY() - mThisPlayer.getY();
+            float d = (float) Math.sqrt(dx*dx + dy*dy);
+            
+            if(d < 40) {
+                mThisPlayer.takeCoin(coin);
+                mEngine.getScene().detachChild(coin);
+                toRemove.add(coin);
+                Log.w("Detach", coin.getX() + " " + coin.getY());
+            }
+        }
+
+        for (Coin coin : toRemove) {
+            mCoins.remove(coin);
+            mEngine.getScene().detachChild(coin);
         }
         this.mCamera.setCenter(mThisPlayer.getX(), mThisPlayer.getY());
     }
