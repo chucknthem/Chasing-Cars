@@ -13,6 +13,7 @@ import org.anddev.andengine.engine.handler.IUpdateHandler;
 import org.anddev.andengine.engine.options.EngineOptions;
 import org.anddev.andengine.engine.options.EngineOptions.ScreenOrientation;
 import org.anddev.andengine.engine.options.resolutionpolicy.RatioResolutionPolicy;
+import org.anddev.andengine.entity.primitive.Line;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.scene.background.ColorBackground;
 import org.anddev.andengine.entity.scene.background.RepeatingSpriteBackground;
@@ -137,11 +138,28 @@ public class Game extends BaseChasingCarActivity implements Scene.IOnSceneTouchL
 
         mPlayers.add(mThisPlayer);
 
+        Line line1 = new Line(-40, -40, MAP_WIDTH - CAMERA_WIDTH/2 + 40, -40);
+        Line line2 = new Line(-40, -40, -40, MAP_WIDTH - CAMERA_WIDTH/2 + 40);
+
+        Line line3 = new Line(-40, MAP_HEIGHT - CAMERA_HEIGHT/2 + 40, MAP_WIDTH - CAMERA_WIDTH/2 + 40, MAP_HEIGHT - CAMERA_HEIGHT/2 + 40);
+        Line line4 = new Line(MAP_WIDTH - CAMERA_WIDTH/2 + 40, -40, MAP_WIDTH - CAMERA_WIDTH/2 + 40, MAP_HEIGHT - CAMERA_HEIGHT/2 + 40);
+
+        line1.setColor(0, 0, 0);
+        line2.setColor(0, 0, 0);
+        line3.setColor(0, 0, 0);
+        line4.setColor(0, 0, 0);
+
+        scene.attachChild(line1);
+        scene.attachChild(line2);
+        scene.attachChild(line3);
+        scene.attachChild(line4);
+
+
         /// Randomly distribute some coins.
         Random rGen = new Random(RANDOM_SEED);
         for (int i = 0; i < COIN_COUNT; i++) {
-            float x = rGen.nextFloat() * MAP_WIDTH;
-            float y = rGen.nextFloat() * MAP_HEIGHT;
+            float x = rGen.nextFloat() * (MAP_WIDTH - CAMERA_WIDTH/2);
+            float y = rGen.nextFloat() * (MAP_HEIGHT - CAMERA_HEIGHT/2);
             Coin coin = new Coin(x, y);
             scene.attachChild(coin);
             mCoins.add(coin);
