@@ -7,6 +7,7 @@ import com.hackathon.chasingcars.entity.Coin;
 import com.hackathon.chasingcars.entity.Player;
 import org.anddev.andengine.collision.RectangularShapeCollisionChecker;
 import org.anddev.andengine.engine.Engine;
+import org.anddev.andengine.engine.camera.Camera;
 import org.anddev.andengine.engine.camera.SmoothCamera;
 import org.anddev.andengine.engine.handler.IUpdateHandler;
 import org.anddev.andengine.engine.options.EngineOptions;
@@ -23,6 +24,8 @@ import org.anddev.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas;
 import org.anddev.andengine.opengl.texture.atlas.bitmap.source.AssetBitmapTextureAtlasSource;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import org.anddev.andengine.opengl.texture.region.TiledTextureRegion;
+
+import javax.microedition.khronos.opengles.GL10;
 
 public class Game extends BaseChasingCarActivity implements Scene.IOnSceneTouchListener, IUpdateHandler {
     // ===========================================================
@@ -101,12 +104,20 @@ public class Game extends BaseChasingCarActivity implements Scene.IOnSceneTouchL
 
     @Override
     public void onLoadResources() {
-        this.mBitmapTextureAtlas = new BitmapTextureAtlas(128, 128, TextureOptions.DEFAULT);
-        //this.mPlayerTextureRegion = BitmapTextureAtlasTextureRegionFactory.createTiledFromAsset(this.mBitmapTextureAtlas, this, "player.png", 0, 0, 3, 4);
+        this.mGrassBackground = new RepeatingSpriteBackground(CAMERA_WIDTH + 200, CAMERA_HEIGHT + 200, this.mEngine.getTextureManager(), new AssetBitmapTextureAtlasSource(this, "grass3.png")) {
+            public void onDraw(GL10 pGL, Camera pCamera) {
+                pGL.glPushMatrix();
 
-        this.mGrassBackground = new RepeatingSpriteBackground(CAMERA_WIDTH, CAMERA_HEIGHT, this.mEngine.getTextureManager(), new AssetBitmapTextureAtlasSource(this, "grass.jpg"));
+                float camX = (int)pCamera.getMinX() % 64;
+                camX += (pCamera.getMinX() - (int)pCamera.getMinX());
+                float camY = (int)pCamera.getMinY() % 64;
+                camY += (pCamera.getMinY() - (int)pCamera.getMinY());
 
-        this.mEngine.getTextureManager().loadTexture(this.mBitmapTextureAtlas);
+                pGL.glTranslatef(-1 * camX, -1 * camY, 0);
+                super.onDraw(pGL, pCamera);
+                pGL.glPopMatrix();
+            }
+        };
     }
 
     @Override
