@@ -19,4 +19,21 @@ public class Coin extends Rectangle {
     public boolean isTaken() {
         return mTaken;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Coin coin = (Coin) o;
+
+        if (mTaken == coin.mTaken && coin.getX() == this.getX() && coin.getY() == this.getY()) return true;
+
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return ((int) (this.getX() * 31 + this.getY() * 7));
+    }
 }

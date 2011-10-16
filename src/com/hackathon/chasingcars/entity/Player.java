@@ -83,4 +83,10 @@ public class Player extends Rectangle implements IUpdateHandler {
         }
         mDirection = Math.atan2((double)newY, (double) newX);
     }
+
+    public void takeCoin(Coin coin) {
+        coin.take();
+        mCoinCount++;
+
+    }
 }

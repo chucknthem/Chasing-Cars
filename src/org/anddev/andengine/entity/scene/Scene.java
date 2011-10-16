@@ -30,7 +30,7 @@ import android.util.SparseArray;
 public class Scene extends Entity {
 	// ===========================================================
 	// Constants
-	// ===========================================================
+	// ==============================Fatta=============================
 
 	private static final int TOUCHAREAS_CAPACITY_DEFAULT = 4;
 
