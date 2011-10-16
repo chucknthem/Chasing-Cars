@@ -32,19 +32,19 @@ public class Game extends BaseChasingCarActivity implements Scene.IOnSceneTouchL
     /* Initializing the Random generator produces a comparable result over different versions. */
     private static final long RANDOM_SEED = 1234567890;
 
-    private static final float MAP_WIDTH = 5000;
-    private static final float MAP_HEIGHT = 5000;
+    public static final float MAP_WIDTH = 5000;
+    public static final float MAP_HEIGHT = 5000;
 
     private static final float STARTX = MAP_WIDTH/2;
     private static final float STARTY = MAP_HEIGHT/2;
 
-    private static final float CAMERA_WIDTH = 1000;
-    private static final float CAMERA_HEIGHT = 800;
+    public static final float CAMERA_WIDTH = 1000;
+    public static final float CAMERA_HEIGHT = 800;
     private static final float CAM_MAX_VELOCITY_X = 350f;
     private static final float CAM_MAX_VELOCITY_Y = 350f;
     private static final float CAM_ZOOM_FACTOR = 5f;
     
-    private static final float COIN_COUNT = 500;
+    private static final float COIN_COUNT = 100;
 
     private static final int BG_RED = 1;
     private static final int BG_GREEN = 1;
@@ -197,16 +197,24 @@ public class Game extends BaseChasingCarActivity implements Scene.IOnSceneTouchL
 
         List<Coin> toRemove = new ArrayList<Coin>();
         for (Coin coin : mCoins) {
+            if (Math.abs(coin.getX() - mThisPlayer.getX()) < 40 && Math.abs(coin.getY() - mThisPlayer.getY()) < 40) {
+                mThisPlayer.takeCoin(coin);
+                mEngine.getScene().detachChild(coin);
+                toRemove.add(coin);
+            } else if (coin.getX() > mThisPlayer.getX()) {
+                break;
+            }
+            /*
             float dx = coin.getX() - mThisPlayer.getX();
             float dy = coin.getY() - mThisPlayer.getY();
             float d = (float) Math.sqrt(dx*dx + dy*dy);
-            
+
             if(d < 40) {
                 mThisPlayer.takeCoin(coin);
                 mEngine.getScene().detachChild(coin);
                 toRemove.add(coin);
                 Log.w("Detach", coin.getX() + " " + coin.getY());
-            }
+            }*/
         }
 
         for (Coin coin : toRemove) {

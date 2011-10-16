@@ -1,6 +1,7 @@
 package com.hackathon.chasingcars.entity;
 
 import android.util.Log;
+import com.hackathon.chasingcars.Game;
 import org.anddev.andengine.engine.handler.IUpdateHandler;
 import org.anddev.andengine.entity.primitive.Rectangle;
 
@@ -62,15 +63,22 @@ public class Player extends Rectangle implements IUpdateHandler {
  
     @Override
     protected void onManagedUpdate(final float pSecondsElapsed) {
+
         float moveX = mVelocity * pSecondsElapsed * (float) Math.cos(mDirection);
         float moveY = mVelocity * pSecondsElapsed * (float) Math.sin(mDirection);
-        this.mX += moveX;
-        this.mY += moveY;
+        float newX = this.mX + moveX;
+        float newY = this.mY + moveY;
 
         mVelocity = mVelocity - PLAYER_DECELERATION * pSecondsElapsed;
         if (mVelocity < 0) mVelocity = 0;
         
         super.onManagedUpdate(pSecondsElapsed);
+        if (newX > (0 + Game.CAMERA_WIDTH/2) && newX < (Game.MAP_WIDTH - Game.CAMERA_WIDTH/2) &&
+            newY > (0 + Game.CAMERA_WIDTH/2) && newY < (Game.MAP_HEIGHT - Game.CAMERA_HEIGHT/2)) {
+            this.mX = newX;
+            this.mY = newY;
+        }
+
     }
 
     public void accelerate(final float x, final float y) {
