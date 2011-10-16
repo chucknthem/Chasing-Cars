@@ -10,6 +10,7 @@ public class Coin extends Rectangle {
     private boolean mTaken = false;
     public Coin(final float startX, final float startY) {
         super(startX, startY, COIN_WIDTH, COIN_HEIGHT);
+        this.setColor(0.8f, 1.0f, 0.0f, 1.0f);
     }
 
     public void take() {
