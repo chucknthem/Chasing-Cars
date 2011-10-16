@@ -1,4 +1,4 @@
-package com.example.android.BluetoothChat;
+package com.hackathon.chasingcars;
 
 import java.net.ServerSocket;
 
