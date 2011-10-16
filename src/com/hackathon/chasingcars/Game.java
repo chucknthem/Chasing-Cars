@@ -54,8 +54,8 @@ public class Game extends BaseChasingCarActivity implements Scene.IOnSceneTouchL
 
     private static final float CAMERA_WIDTH = 1000;
     private static final float CAMERA_HEIGHT = 800;
-    private static final float CAM_MAX_VELOCITY_X = 200.0f;
-    private static final float CAM_MAX_VELOCITY_Y = 200.0f;
+    private static final float CAM_MAX_VELOCITY_X = 350f;
+    private static final float CAM_MAX_VELOCITY_Y = 350f;
     private static final float CAM_ZOOM_FACTOR = 5f;
     
     private static final int LINE_COUNT = 100;
@@ -161,8 +161,10 @@ public class Game extends BaseChasingCarActivity implements Scene.IOnSceneTouchL
 
         if (action == MotionEvent.ACTION_DOWN || action == MotionEvent.ACTION_MOVE) {
             this.mIsAccelerating = true;
-            this.mTouchX = pSceneTouchEvent.getMotionEvent().getX();
-            this.mTouchY = pSceneTouchEvent.getMotionEvent().getY();
+            //this.mTouchX = pSceneTouchEvent.getMotionEvent().getX(); // relative to camera
+            //this.mTouchY = pSceneTouchEvent.getMotionEvent().getY(); // relative to camera
+            this.mTouchX = pSceneTouchEvent.getX(); // scene global
+            this.mTouchY = pSceneTouchEvent.getY(); // scene global
         } else if (action == MotionEvent.ACTION_UP) {
             this.mIsAccelerating = false;
         }
@@ -180,13 +182,15 @@ public class Game extends BaseChasingCarActivity implements Scene.IOnSceneTouchL
     @Override
     public void onUpdate(float pSecondsElapsed) {
         if (mIsAccelerating) {
-            float aX = mThisPlayer.getX() - this.mCamera.getMinX() - mTouchX;
-            float aY = mThisPlayer.getY() - this.mCamera.getMinY() - mTouchY;
+            float aX = mTouchX - mThisPlayer.getX();
+            float aY = mTouchY - mThisPlayer.getY();
             Log.w("Touch", mTouchX + " " + mTouchY);
             Log.w("Player", mThisPlayer.getX() + " " + mThisPlayer.getY());
+            Log.w("Accelerate", aX + " " + aY);
 
             mThisPlayer.accelerate(aX, aY);
         }
+        this.mCamera.setCenter(mThisPlayer.getX(), mThisPlayer.getY());
     }
 
     @Override

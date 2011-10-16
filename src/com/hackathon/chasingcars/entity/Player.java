@@ -18,7 +18,9 @@ public class Player extends Rectangle implements IUpdateHandler {
     private static final float PLAYER_HEIGHT = 40f;
 
     private static final float PLAYER_DECELERATION = 100f; // per second.
-    private static final float PLAYER_ACCELERATION = .1f;
+    private static final float PLAYER_ACCELERATION = .05f;
+
+    public static final float PLAYER_MAX_VELOCITY = 400;
     
     public static enum COLOR {
         RED,
@@ -64,7 +66,7 @@ public class Player extends Rectangle implements IUpdateHandler {
         }
         this.setColor(red, green, blue);
     }
-
+ 
     @Override
     protected void onManagedUpdate(final float pSecondsElapsed) {
         float moveX = mVelocity * pSecondsElapsed * (float) Math.cos(mDirection);
@@ -83,6 +85,9 @@ public class Player extends Rectangle implements IUpdateHandler {
         float newY = mVelocity * (float) Math.sin(mDirection) + y * PLAYER_ACCELERATION;
 
         mVelocity = (float) Math.sqrt((double)(newX * newX + newY * newY));
-        mDirection = Math.atan2((double)newX, (double) newY);
+        if (mVelocity > PLAYER_MAX_VELOCITY) {
+            mVelocity = PLAYER_MAX_VELOCITY;
+        }
+        mDirection = Math.atan2((double)newY, (double) newX);
     }
 }
