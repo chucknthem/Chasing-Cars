@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.example.android.BluetoothChat;
+package com.hackathon.chasingcars;
 
 import java.util.Set;
 

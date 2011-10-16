@@ -1,0 +1,32 @@
+package chasingcars;
+
+option java_package = "com.hackathon.chasingcars.protocol";
+option java_outer_classname = "Messages";
+
+message WhoAmI {
+  required string deviceAddr = 1;
+}
+
+message YouAre {
+  required string deviceAddr = 1;
+  required int32 player = 2;
+}
+
+message PlayerPos {
+  required int32 player = 1;
+  required int32 x = 2;
+  required int32 y = 3;
+}
+
+message PlayerCoins {
+  required int32 player = 1;
+  required int32 coins = 2;
+}
+
+message GameStart {
+  required string time = 1;
+}
+
+message GameEnd {
+  required string time = 1;
+}

@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-package com.example.android.BluetoothChat;
+package com.hackathon.chasingcars;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.reflect.Array;
 import java.util.*;
 
 import android.app.Activity;
@@ -27,11 +26,8 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
-import android.content.Context;
 import android.content.Intent;
-import android.os.Bundle;
 import android.os.Handler;
-import android.os.Message;
 import android.util.Log;
 
 /**
@@ -204,7 +200,7 @@ public class BluetoothChatService {
     /**
      * Write to the ConnectedThread in an unsynchronized manner
      * @param out The bytes to write
-     * @see com.example.android.BluetoothChat.BluetoothChatService.ConnectedThread#write(byte[])
+     * @see BluetoothChatService.ConnectedThread#write(byte[])
      */
     public void write(byte[] out) {
         // Create temporary object
@@ -225,6 +221,14 @@ public class BluetoothChatService {
             // Perform the write unsynchronized
             r.write(out);
         }
+    }
+
+    public String getDeviceAddress() {
+        return mAdapter.getAddress();
+    }
+
+    public boolean isServer() {
+        return serverListenThread != null;
     }
 
     /**

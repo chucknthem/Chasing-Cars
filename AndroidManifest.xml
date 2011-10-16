@@ -14,7 +14,7 @@
      limitations under the License.
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-      package="com.example.android.BluetoothChat"
+      package="com.hackathon.chasingcars"
       android:versionCode="1"
       android:versionName="1.0">
     <uses-sdk minSdkVersion="6" />
@@ -23,11 +23,15 @@
 
     <application android:label="@string/app_name"
                  android:icon="@drawable/app_icon" >
-        <activity android:name=".BluetoothChat"
+        <activity android:name="com.hackathon.chasingcars.BluetoothChat"
                   android:label="@string/app_name"
                   android:configChanges="orientation|keyboardHidden">
         </activity>
-        <activity android:name="HomePage"
+        <activity android:name="com.hackathon.chasingcars.ProtocolDebugger"
+                  android:label="@string/app_name"
+                  android:configChanges="orientation|keyboardHidden">
+        </activity>
+        <activity android:name="com.hackathon.chasingcars.HomePage"
                   android:label="@string/app_name"
                   android:configChanges="orientation|keyboardHidden">
 <!--            <intent-filter>
@@ -36,15 +40,17 @@
             </intent-filter>
             -->
         </activity>
-        <activity android:name=".DeviceListActivity"
+        <activity android:name="com.hackathon.chasingcars.DeviceListActivity"
                   android:label="@string/select_device"
                   android:theme="@android:style/Theme.Dialog"
                   android:configChanges="orientation|keyboardHidden" />
         <activity android:name="com.hackathon.chasingcars.Game">
+<!--
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+-->
         </activity>
     </application>
 </manifest>
