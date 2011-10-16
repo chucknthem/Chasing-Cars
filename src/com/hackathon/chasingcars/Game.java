@@ -18,10 +18,18 @@ import org.anddev.andengine.entity.primitive.Line;
 import org.anddev.andengine.entity.primitive.Rectangle;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.scene.background.ColorBackground;
+import org.anddev.andengine.entity.scene.background.RepeatingSpriteBackground;
 import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.entity.util.FPSLogger;
 import org.anddev.andengine.input.touch.TouchEvent;
 import org.anddev.andengine.opengl.texture.TextureManager;
+import org.anddev.andengine.opengl.texture.TextureOptions;
+import org.anddev.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas;
+import org.anddev.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlasTextureRegionFactory;
+import org.anddev.andengine.opengl.texture.atlas.bitmap.source.AssetBitmapTextureAtlasSource;
+import org.anddev.andengine.opengl.texture.region.TextureRegion;
+import org.anddev.andengine.opengl.texture.region.TextureRegionFactory;
+import org.anddev.andengine.opengl.texture.region.TiledTextureRegion;
 
 /**
  * (c) 2010 Nicolas Gramlich
@@ -75,6 +83,12 @@ public class Game extends BaseChasingCarActivity implements Scene.IOnSceneTouchL
     // Touch
     private float mTouchX, mTouchY, mTouchOffsetX, mTouchOffsetY;
 
+    private BitmapTextureAtlas mAutoParallaxBackgroundTexture;
+    private TextureRegion mParallaxLayerFront;
+    private BitmapTextureAtlas mBitmapTextureAtlas;
+    private TiledTextureRegion mPlayerTextureRegion;
+    private RepeatingSpriteBackground mGrassBackground;
+
     // ===========================================================
     // Constructors
     // ===========================================================
@@ -97,7 +111,12 @@ public class Game extends BaseChasingCarActivity implements Scene.IOnSceneTouchL
 
     @Override
     public void onLoadResources() {
+        this.mBitmapTextureAtlas = new BitmapTextureAtlas(128, 128, TextureOptions.DEFAULT);
+        //this.mPlayerTextureRegion = BitmapTextureAtlasTextureRegionFactory.createTiledFromAsset(this.mBitmapTextureAtlas, this, "player.png", 0, 0, 3, 4);
 
+        this.mGrassBackground = new RepeatingSpriteBackground(CAMERA_WIDTH, CAMERA_HEIGHT, this.mEngine.getTextureManager(), new AssetBitmapTextureAtlasSource(this, "grass.jpg"));
+
+        this.mEngine.getTextureManager().loadTexture(this.mBitmapTextureAtlas);
     }
 
     @Override
@@ -105,9 +124,10 @@ public class Game extends BaseChasingCarActivity implements Scene.IOnSceneTouchL
         this.mEngine.registerUpdateHandler(new FPSLogger());
         this.mCamera.setCenter(STARTX, STARTY);
         //this.mEngine.registerUpdateHandler(this);
-        
+
         final Scene scene = new Scene();
         scene.setBackground(new ColorBackground(BG_RED, BG_GREEN, BG_BLUE));
+        scene.setBackground(this.mGrassBackground);
 
         mThisPlayer = new Player("bob", "1", STARTX, STARTY);
         mThisPlayer.setColor(Player.COLOR.RED);
