@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
+import com.hackathon.chasingcars.entity.Player;
 
 public class HomePage extends Activity {
 	private static final String TAG = "chasingcars:HomePage";
@@ -18,8 +19,15 @@ public class HomePage extends Activity {
     private static final int REQUEST_DEVICE = 1;
     private static final int REQUEST_ENABLE_BT = 3;
 
+
+    // single player
+    Button btnSingle;
+    Button btnAI;
+
+    // multiplayer
     Button btnJoin;
     Button btnCreate;
+
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -33,10 +41,26 @@ public class HomePage extends Activity {
         // set up listener for the buttons
         btnJoin = (Button)findViewById(R.id.btnJoin);
         btnCreate = (Button)findViewById(R.id.btnCreate);
+        btnAI = (Button)findViewById(R.id.btnAI);
+        btnSingle = (Button)findViewById(R.id.btnSingle);
 
         btnJoin.setOnClickListener(buttonHandler);
         btnCreate.setOnClickListener(buttonHandler);
+        btnAI.setOnClickListener(buttonHandler);
+        btnSingle.setOnClickListener(buttonHandler);
 	}
+
+    private void startGame(int numPlayers, String[] players) {
+        Intent intent = new Intent(this, Game.class);
+        intent.putExtra("numPlayers", numPlayers);
+
+        for(int i = 0; i < numPlayers; i++) {
+            intent.putExtra("player_" + i, players[i]);
+        }
+
+        startActivity(intent);
+    }
+
 
     private Button.OnClickListener buttonHandler = new Button.OnClickListener() {
         @Override
@@ -46,8 +70,17 @@ public class HomePage extends Activity {
                 Intent intent = new Intent(homeContext, ProtocolDebugger.class);
                 intent.putExtra("mode", Common.BluetoothMode.Server.toString());
                 startActivity(intent);
+            } else if (view.getId() == btnAI.getId()) {
+                // chose to play against the AI
+                startGame(2, new String[] {
+                        Player.createString("bob", "", Player.COLOR.RED),
+                        Player.createString("ai", "", Player.COLOR.BLUE)});
+            } else if (view.getId() == btnSingle.getId()) {
+                // choose to play by himself..
+                startGame(1, new String[] {
+                        Player.createString("bob", "", Player.COLOR.RED)});
             } else {
-                // show the device list, and pick a device
+                // Chose to join an existing game, first we need to pick the right device
                 Intent i = new Intent(homeContext, DeviceListActivity.class);
                 startActivityForResult(i, REQUEST_DEVICE);
             }
@@ -67,7 +100,7 @@ public class HomePage extends Activity {
 	@Override
 	public synchronized void onResume() {
 	    super.onResume();
-	    if(D) Log.e(TAG, "+ ON RESUME +");
+	    if(D) Log.e(TAG, "+ ON RESUME LOL +");
 
 	}
 

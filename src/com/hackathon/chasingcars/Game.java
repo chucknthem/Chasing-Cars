@@ -40,8 +40,8 @@ public class Game extends BaseChasingCarActivity implements Scene.IOnSceneTouchL
     public static final float MAP_WIDTH = 5000;
     public static final float MAP_HEIGHT = 5000;
 
-    private static final float STARTX = MAP_WIDTH/2;
-    private static final float STARTY = MAP_HEIGHT/2;
+    public static final float STARTX = MAP_WIDTH/2;
+    public static final float STARTY = MAP_HEIGHT/2;
 
     public static float CAMERA_WIDTH;
     public static float CAMERA_HEIGHT;
@@ -68,10 +68,9 @@ public class Game extends BaseChasingCarActivity implements Scene.IOnSceneTouchL
     private List<Coin> mCoins = new LinkedList<Coin>();
 
     private Player mThisPlayer;
+    private List<Player> players;
 
     private boolean mIsAccelerating = false;
-
-
 
     // Touch
     private float mTouchX, mTouchY, mTouchOffsetX, mTouchOffsetY;
@@ -105,7 +104,25 @@ public class Game extends BaseChasingCarActivity implements Scene.IOnSceneTouchL
         CAMERA_HEIGHT = metrics.widthPixels;
         CAMERA_WIDTH = metrics.heightPixels;
     }
-    
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Bundle b = getIntent().getExtras();
+
+        // go through the bundle and figure out the players
+        int numPlayers = b.getInt("numPlayers");
+
+        players = new ArrayList<Player>(numPlayers);
+
+        for(int i = 0; i < numPlayers; i++) {
+            Player p = new Player(b.getString("player_" + i));
+            players.add(p);
+        }
+
+        mThisPlayer = players.get(0);
+    }
+
     @Override
     public Engine onLoadEngine() {
 
@@ -145,10 +162,9 @@ public class Game extends BaseChasingCarActivity implements Scene.IOnSceneTouchL
         scene.setBackground(new ColorBackground(BG_RED, BG_GREEN, BG_BLUE));
         scene.setBackground(this.mGrassBackground);
 
-        mThisPlayer = new Player("bob", "1", STARTX, STARTY);
-        mThisPlayer.setColor(Player.COLOR.RED);
-
-        scene.attachChild(mThisPlayer);
+        for(Player p : players) {
+            scene.attachChild(p);
+        }
 
         mPlayers.add(mThisPlayer);
 
