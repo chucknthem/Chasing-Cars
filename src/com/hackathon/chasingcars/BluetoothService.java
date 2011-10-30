@@ -36,7 +36,7 @@ import android.util.Log;
  * incoming connections, a thread for connecting with a device, and a
  * thread for performing data transmissions when connected.
  */
-public class BluetoothChatService {
+public class BluetoothService {
     // Debugging
     private static final String TAG = "chasingcars:BluetoothChatService";
     private static final boolean D = true;
@@ -83,7 +83,7 @@ public class BluetoothChatService {
      * @param owner  The UI Activity
      * @param handler  A Handler to send messages back to the UI Activity
      */
-    public BluetoothChatService(Activity owner, Handler handler) {
+    public BluetoothService(Activity owner, Handler handler) {
         mAdapter = BluetoothAdapter.getDefaultAdapter();
         mState = STATE_NONE;
         mHandler = handler;
@@ -200,7 +200,7 @@ public class BluetoothChatService {
     /**
      * Write to the ConnectedThread in an unsynchronized manner
      * @param out The bytes to write
-     * @see BluetoothChatService.ConnectedThread#write(byte[])
+     * @see BluetoothService.ConnectedThread#write(byte[])
      */
     public void write(byte[] out) {
         // Create temporary object
@@ -442,6 +442,8 @@ public class BluetoothChatService {
                     break;
                 }
             }
+
+            connectionLost();
         }
 
         /**

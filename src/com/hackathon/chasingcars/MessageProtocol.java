@@ -1,22 +1,18 @@
 package com.hackathon.chasingcars;
 
-import android.nfc.Tag;
 import android.text.format.Time;
-import android.text.method.DateTimeKeyListener;
 import android.util.Log;
 import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.Message;
 import com.hackathon.chasingcars.protocol.Messages;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.Date;
 
 public class MessageProtocol {
     private static final String TAG = "chasingcars:MessageProtocol";
 
-    BluetoothChatService service = null;
+    // debug the protocol?
+    private static final boolean D_P = false;
+
+    BluetoothService service = null;
 
     final static int MESSAGE_WHOAMI = 0;
     final static int MESSAGE_YOUARE = 1;
@@ -25,8 +21,15 @@ public class MessageProtocol {
     final static int MESSAGE_GAMESTART = 4;
     final static int MESSAGE_GAMEEND = 5;
 
-    public MessageProtocol(BluetoothChatService service) {
+    boolean useGeneric = false;
+
+    public MessageProtocol(BluetoothService service) {
         this.service = service;
+    }
+
+    public MessageProtocol(BluetoothService service, boolean useGeneric) {
+        this(service);
+        this.useGeneric = useGeneric;
     }
 
     private void send(int type, com.google.protobuf.GeneratedMessage msg) {
@@ -36,16 +39,20 @@ public class MessageProtocol {
             throw new IllegalArgumentException("Can't handle large messages");
         }
 
-        byte msgType = (byte)type;
-        byte msgLength = (byte)bytes.length;
+        byte[] message = new byte[bytes.length + 2];
+        message[0] = (byte)bytes.length;
+        message[1] = (byte)type;
 
-        byte[] header = new byte[]{msgLength, msgType};
-        service.write(header);
-        service.write(msg.toByteArray());
+        for(int i = 0; i < bytes.length; i++) {
+            message[i + 2] = bytes[i];
+        }
 
-        //System.out.println("Sending bytes:");
-        //dumpBytes(header);
-        //dumpBytes(msg.toByteArray());
+        if (D_P) {
+            System.out.println("Sending bytes:");
+            dumpBytes(message);
+        }
+
+        service.write(message);
     }
 
     public void sendPlayerPos(int player, int x, int y) {
@@ -57,11 +64,14 @@ public class MessageProtocol {
         send(MESSAGE_PLAYERPOS, playerPos);
     }
 
+    public String getDevice() {
+        return service.getDeviceAddress();
+    }
+
     public void whoAmI() {
         // send the device address
-        String addr = service.getDeviceAddress();
         Messages.WhoAmI who = Messages.WhoAmI.newBuilder()
-                .setDeviceAddr(addr)
+                .setDeviceAddr(getDevice())
                 .build();
         send(MESSAGE_WHOAMI, who);
     }
@@ -106,21 +116,32 @@ public class MessageProtocol {
     byte[] previous = null;
 
     private void dumpBytes(byte[] buf) {
+        int sum = -1;
         for(int i = 0; i < buf.length; i++) {
             if (i % 16 == 0) {
                 System.out.println();
+                if (sum == 0) break;
+                sum = 0;
             }
-
+            sum += buf[i];
             System.out.print(" " + buf[i]);
         }
     }
 
     public void parseBytes(byte[] buf, MessageHandler handler) {
         // parse magic
-        //System.out.println("parseBytes magically");
-        //dumpBytes(buf);
+        
+        if (D_P) {
+            Log.e(TAG, "parseBytes magically");
+            dumpBytes(buf);
+        }
 
         if (previous != null) {
+            if (D_P) {
+                Log.e(TAG, "previous not null!");
+                dumpBytes(previous);
+            }
+
             byte[] newBuf = new byte[previous.length + buf.length];
             int newBufI = 0;
             for(int i = 0; i < previous.length; i++) {
@@ -128,6 +149,11 @@ public class MessageProtocol {
             }
             for(int i = 0; i < buf.length; i++) {
                 newBuf[newBufI++] = buf[i];
+            }
+
+            if (D_P) {
+                Log.e(TAG, "newBuf: ");
+                dumpBytes(newBuf);
             }
 
             buf = newBuf;
@@ -141,6 +167,9 @@ public class MessageProtocol {
 
             if (msgLength == 0) {
                 // this isn't a message!
+                if (D_P) {
+                    Log.e(TAG, "msg length of 0 found?");
+                }
                 break;
             }
 
@@ -150,11 +179,20 @@ public class MessageProtocol {
                 for(int j = 0; j < previous.length; j++) {
                     previous[j] = buf[bufI++];
                 }
+
+                if (D_P) {
+                    Log.e(TAG, "shoved into previous");
+                    dumpBytes(previous);
+                }
             } else {
                 // all good, we can parse it
                 byte[] current = new byte[msgLength];
                 for(int j = 0; j < msgLength; j++) {
                     current[j] = buf[bufI++];
+                }
+
+                if (D_P) {
+                    Log.e(TAG, "parseIntoMsg");
                 }
 
                 // parse the damn thing
@@ -168,27 +206,51 @@ public class MessageProtocol {
             switch(msgType) {
                 case MESSAGE_GAMEEND:
                     Messages.GameEnd ge = Messages.GameEnd.parseFrom(buf);
-                    handler.handleGameEnd(ge.getTime());
+                    if (useGeneric) {
+                        handler.handleMessage(msgType, ge);
+                    } else {
+                        handler.handleGameEnd(ge.getTime());
+                    }
                     break;
                 case MESSAGE_GAMESTART:
                     Messages.GameStart gs = Messages.GameStart.parseFrom(buf);
-                    handler.handleGameStart(gs.getTime());
+                    if (useGeneric) {
+                        handler.handleMessage(msgType, gs);
+                    } else {
+                        handler.handleGameStart(gs.getTime());
+                    }
                     break;
                 case MESSAGE_PLAYERCOINS:
                     Messages.PlayerCoins cs = Messages.PlayerCoins.parseFrom(buf);
-                    handler.handlePlayerCoins(cs.getPlayer(), cs.getCoins());
+                    if (useGeneric) {
+                        handler.handleMessage(msgType, cs);
+                    } else {
+                        handler.handlePlayerCoins(cs.getPlayer(), cs.getCoins());
+                    }
                     break;
                 case MESSAGE_PLAYERPOS:
                     Messages.PlayerPos ps = Messages.PlayerPos.parseFrom(buf);
-                    handler.handlePlayerPos(ps.getPlayer(),  ps.getX(), ps.getY());
+                    if (useGeneric) {
+                        handler.handleMessage(msgType, ps);
+                    } else {
+                        handler.handlePlayerPos(ps.getPlayer(),  ps.getX(), ps.getY());
+                    }
                     break;
                 case MESSAGE_WHOAMI:
                     Messages.WhoAmI who = Messages.WhoAmI.parseFrom(buf);
-                    handler.handleWhoAmI(who.getDeviceAddr());
+                    if (useGeneric) {
+                        handler.handleMessage(msgType, who);
+                    } else {
+                        handler.handleWhoAmI(who.getDeviceAddr());
+                    }
                     break;
                 case MESSAGE_YOUARE:
                     Messages.YouAre you = Messages.YouAre.parseFrom(buf);
-                    handler.handleYouAre(you.getDeviceAddr(), you.getPlayer());
+                    if (useGeneric) {
+                        handler.handleMessage(msgType, you);
+                    } else {
+                        handler.handleYouAre(you.getDeviceAddr(), you.getPlayer());
+                    }
                     break;
             }
         } catch (InvalidProtocolBufferException e) {
@@ -203,5 +265,8 @@ public class MessageProtocol {
         void handlePlayerCoins(int player, int coins);
         void handleGameStart(String time);
         void handleGameEnd(String time);
+
+        // generic handler if you want to avoid calling each of the above ones..
+        void handleMessage(byte messageType, Object message);
     }
 }

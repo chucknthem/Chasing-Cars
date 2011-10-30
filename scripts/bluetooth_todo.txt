@@ -1,0 +1,8 @@
+TODO
+ - server should start game with countdown
+ - handle disconnects (on either side) nicely
+ - server should stop listening once the game has started
+ - 
+
+OPTIMISATIONS:
+ - possibly look for optimisations in the MessageProtocol file (esp relative to previous stuff)

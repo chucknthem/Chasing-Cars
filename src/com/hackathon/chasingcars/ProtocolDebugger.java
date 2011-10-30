@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -18,7 +17,7 @@ public class ProtocolDebugger extends Activity {
     private Context homeContext;
 
     private BluetoothAdapter mBluetoothAdapter;
-    private BluetoothChatService mChatService;
+    private BluetoothService mService;
     private MessageProtocol messager;
 
     // layout stuff
@@ -173,6 +172,10 @@ public class ProtocolDebugger extends Activity {
         public void handleGameEnd(String time) {
             txtGameStatus.setText("Game ended at: " + time);
         }
+
+        @Override
+        public void handleMessage(byte messageType, Object message) {
+        }
     };
 
     // The Handler that gets information back from the BluetoothChatService
@@ -180,30 +183,30 @@ public class ProtocolDebugger extends Activity {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-            case BluetoothChatService.MESSAGE_STATECHANGE:
+            case BluetoothService.MESSAGE_STATECHANGE:
                 if(D) Log.i(TAG, "MESSAGE_STATE_CHANGE: " + msg.arg1);
                 switch (msg.arg1) {
-                case BluetoothChatService.STATE_CONNECTED:
+                case BluetoothService.STATE_CONNECTED:
                     txtConnectStatus.setText("Connected");
-                    messager = new MessageProtocol(mChatService);
+                    messager = new MessageProtocol(mService);
                     break;
-                case BluetoothChatService.STATE_CONNECTING:
+                case BluetoothService.STATE_CONNECTING:
                     txtConnectStatus.setText("Connecting");
                     break;
-                case BluetoothChatService.STATE_LISTEN:
+                case BluetoothService.STATE_LISTEN:
                     txtConnectStatus.setText("Listening");
                     break;
-                case BluetoothChatService.STATE_DISCONNECTED:
+                case BluetoothService.STATE_DISCONNECTED:
                     txtConnectStatus.setText("Disconnected");
                     Toast.makeText(getApplicationContext(), "Disconnected!", Toast.LENGTH_SHORT);
                     finish();
                     break;
-                case BluetoothChatService.STATE_NONE:
+                case BluetoothService.STATE_NONE:
                     txtConnectStatus.setText("Not Connected");
                     break;
                 }
                 break;
-            case BluetoothChatService.MESSAGE_READ:
+            case BluetoothService.MESSAGE_READ:
                 byte[] readBuf = (byte[]) msg.obj;
                 messager.parseBytes(readBuf, handler);
                 break;
@@ -215,22 +218,20 @@ public class ProtocolDebugger extends Activity {
         Log.d(TAG, "setupChat()");
 
         // Initialize the BluetoothChatService to perform bluetooth connections
-        mChatService = new BluetoothChatService(this, mHandler);
+        mService = new BluetoothService(this, mHandler);
 
         // start up the bluetooth chat service
         Common.BluetoothMode mode = Enum.valueOf(Common.BluetoothMode.class,
                 getIntent().getExtras().getString("mode"));
         if (mode == Common.BluetoothMode.Server) {
             if(D) Log.w(TAG, "setupChat starting server");
-            mChatService.setupServer();
+            mService.setupServer();
         } else {
             // get the device
             String deviceAddr = getIntent().getExtras().getString("device");
             if(D) Log.w(TAG, "setupChat starting client for addr: " + deviceAddr);
             BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(deviceAddr);
-            mChatService.setupClient(device);
+            mService.setupClient(device);
         }
     }
-
-
 }

@@ -67,7 +67,7 @@ public class HomePage extends Activity {
         public void onClick(View view) {
             if (view.getId() == btnCreate.getId()) {
                 // create button clicked
-                Intent intent = new Intent(homeContext, ProtocolDebugger.class);
+                Intent intent = new Intent(homeContext, MultiplayerHome.class);
                 intent.putExtra("mode", Common.BluetoothMode.Server.toString());
                 startActivity(intent);
             } else if (view.getId() == btnAI.getId()) {
@@ -142,7 +142,7 @@ public class HomePage extends Activity {
 
             if (resultCode == Activity.RESULT_OK) {
                 String device = data.getExtras().getString(DeviceListActivity.EXTRA_DEVICE_ADDRESS);
-                Intent intent = new Intent(homeContext, ProtocolDebugger.class);
+                Intent intent = new Intent(homeContext, MultiplayerHome.class);
                 intent.putExtra("mode", Common.BluetoothMode.Client.toString());
                 intent.putExtra("device", device);
                 startActivity(intent);

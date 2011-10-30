@@ -62,7 +62,7 @@ public class BluetoothChat extends Activity {
     // Local Bluetooth adapter
     private BluetoothAdapter mBluetoothAdapter = null;
     // Member object for the chat services
-    private BluetoothChatService mChatService = null;
+    private BluetoothService mService = null;
 
 
     @Override
@@ -135,20 +135,20 @@ public class BluetoothChat extends Activity {
         });
 
         // Initialize the BluetoothChatService to perform bluetooth connections
-        mChatService = new BluetoothChatService(this, mHandler);
+        mService = new BluetoothService(this, mHandler);
 
         // start up the bluetooth chat service
         Common.BluetoothMode mode = Enum.valueOf(Common.BluetoothMode.class,
                 getIntent().getExtras().getString("mode"));
         if (mode == Common.BluetoothMode.Server) {
             if(D) Log.w(TAG, "setupChat starting server");
-            mChatService.setupServer();
+            mService.setupServer();
         } else {
             // get the device
             String deviceAddr = getIntent().getExtras().getString("device");
             if(D) Log.w(TAG, "setupChat starting client for addr: " + deviceAddr);
             BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(deviceAddr);
-            mChatService.setupClient(device);
+            mService.setupClient(device);
         }
 
         // Initialize the buffer for outgoing messages
@@ -171,7 +171,7 @@ public class BluetoothChat extends Activity {
     public void onDestroy() {
         super.onDestroy();
         // Stop the Bluetooth chat services
-        if (mChatService != null) mChatService.stop();
+        if (mService != null) mService.stop();
         if(D) Log.e(TAG, "--- ON DESTROY ---");
     }
 
@@ -181,7 +181,7 @@ public class BluetoothChat extends Activity {
      */
     private void sendMessage(String message) {
         // Check that we're actually connected before trying anything
-        if (mChatService.getState() != BluetoothChatService.STATE_CONNECTED) {
+        if (mService.getState() != BluetoothService.STATE_CONNECTED) {
             Toast.makeText(this, R.string.not_connected, Toast.LENGTH_SHORT).show();
             return;
         }
@@ -194,7 +194,7 @@ public class BluetoothChat extends Activity {
             byte[] send = sendMessage.getBytes();
 
             if (D) Log.d(TAG, "Send message using BService: " + message);
-            mChatService.write(send);
+            mService.write(send);
             mConversationArrayAdapter.add("Me:  " + message);
 
             // Reset out string buffer to zero and clear the edit text field
@@ -222,31 +222,31 @@ public class BluetoothChat extends Activity {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-            case BluetoothChatService.MESSAGE_STATECHANGE:
+            case BluetoothService.MESSAGE_STATECHANGE:
                 if(D) Log.i(TAG, "MESSAGE_STATE_CHANGE: " + msg.arg1);
                 switch (msg.arg1) {
-                case BluetoothChatService.STATE_CONNECTED:
+                case BluetoothService.STATE_CONNECTED:
                     mConnected = true;
                     mTitle.setText("Connected");
                     mConversationArrayAdapter.clear();
                     break;
-                case BluetoothChatService.STATE_CONNECTING:
+                case BluetoothService.STATE_CONNECTING:
                     mTitle.setText("Connecting");
                     break;
-                case BluetoothChatService.STATE_LISTEN:
+                case BluetoothService.STATE_LISTEN:
                     mTitle.setText("Listening");
                     break;
-                case BluetoothChatService.STATE_DISCONNECTED:
+                case BluetoothService.STATE_DISCONNECTED:
                     mTitle.setText("Disconnected");
                     Toast.makeText(getApplicationContext(), "Disconnected!", Toast.LENGTH_SHORT);
                     finish();
                     break;
-                case BluetoothChatService.STATE_NONE:
+                case BluetoothService.STATE_NONE:
                     mTitle.setText("Not Connected");
                     break;
                 }
                 break;
-            case BluetoothChatService.MESSAGE_READ:
+            case BluetoothService.MESSAGE_READ:
                 byte[] readBuf = (byte[]) msg.obj;
                 // construct a string from the valid bytes in the buffer
                 String readMessage = new String(readBuf, 0, msg.arg1);
