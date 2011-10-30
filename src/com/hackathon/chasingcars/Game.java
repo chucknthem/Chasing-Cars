@@ -1,17 +1,19 @@
 package com.hackathon.chasingcars;
 import java.util.*;
 
+import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.MotionEvent;
 import com.hackathon.chasingcars.entity.Coin;
 import com.hackathon.chasingcars.entity.Player;
-import org.anddev.andengine.collision.RectangularShapeCollisionChecker;
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.camera.Camera;
 import org.anddev.andengine.engine.camera.SmoothCamera;
 import org.anddev.andengine.engine.handler.IUpdateHandler;
 import org.anddev.andengine.engine.options.EngineOptions;
 import org.anddev.andengine.engine.options.EngineOptions.ScreenOrientation;
+import org.anddev.andengine.engine.options.resolutionpolicy.FillResolutionPolicy;
 import org.anddev.andengine.engine.options.resolutionpolicy.RatioResolutionPolicy;
 import org.anddev.andengine.entity.primitive.Line;
 import org.anddev.andengine.entity.scene.Scene;
@@ -20,7 +22,6 @@ import org.anddev.andengine.entity.scene.background.RepeatingSpriteBackground;
 import org.anddev.andengine.entity.util.FPSLogger;
 import org.anddev.andengine.input.touch.TouchEvent;
 import org.anddev.andengine.opengl.texture.TextureManager;
-import org.anddev.andengine.opengl.texture.TextureOptions;
 import org.anddev.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas;
 import org.anddev.andengine.opengl.texture.atlas.bitmap.source.AssetBitmapTextureAtlasSource;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
@@ -42,19 +43,17 @@ public class Game extends BaseChasingCarActivity implements Scene.IOnSceneTouchL
     private static final float STARTX = MAP_WIDTH/2;
     private static final float STARTY = MAP_HEIGHT/2;
 
-    public static final float CAMERA_WIDTH = 1000;
-    public static final float CAMERA_HEIGHT = 800;
+    public static float CAMERA_WIDTH;
+    public static float CAMERA_HEIGHT;
     private static final float CAM_MAX_VELOCITY_X = 350f;
     private static final float CAM_MAX_VELOCITY_Y = 350f;
     private static final float CAM_ZOOM_FACTOR = 5f;
-    
+
     private static final float COIN_COUNT = 100;
 
     private static final int BG_RED = 1;
     private static final int BG_GREEN = 1;
     private static final int BG_BLUE = 1;
-
-
 
     // ===========================================================
     // Fields
@@ -96,16 +95,31 @@ public class Game extends BaseChasingCarActivity implements Scene.IOnSceneTouchL
     // ===========================================================
 
     @Override
+    protected void onCreate(final Bundle pSavedInstanceState) {
+        super.onCreate(pSavedInstanceState);
+
+        // Make the game full screen.
+        DisplayMetrics metrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(metrics);
+        // Height and width are backwards if the display is in landscape.
+        CAMERA_HEIGHT = metrics.widthPixels;
+        CAMERA_WIDTH = metrics.heightPixels;
+    }
+    
+    @Override
     public Engine onLoadEngine() {
-        this.mCamera = new SmoothCamera(STARTX, STARTY, CAMERA_WIDTH, CAMERA_HEIGHT, CAM_MAX_VELOCITY_X, CAM_MAX_VELOCITY_Y, CAM_ZOOM_FACTOR);
+
+        this.mCamera = new SmoothCamera(STARTX, STARTY, CAMERA_WIDTH, CAMERA_HEIGHT, CAM_MAX_VELOCITY_X,
+                CAM_MAX_VELOCITY_Y, CAM_ZOOM_FACTOR);
         this.mTextureManager = new TextureManager();
         
-        return new Engine(new EngineOptions(true, ScreenOrientation.LANDSCAPE, new RatioResolutionPolicy(MAP_WIDTH, MAP_HEIGHT), this.mCamera));
+        return new Engine(new EngineOptions(true, ScreenOrientation.LANDSCAPE, new FillResolutionPolicy(), this.mCamera));
     }
 
     @Override
     public void onLoadResources() {
-        this.mGrassBackground = new RepeatingSpriteBackground(CAMERA_WIDTH + 200, CAMERA_HEIGHT + 200, this.mEngine.getTextureManager(), new AssetBitmapTextureAtlasSource(this, "grass3.png")) {
+        this.mGrassBackground = new RepeatingSpriteBackground(CAMERA_WIDTH + 200, CAMERA_HEIGHT + 200,
+                this.mEngine.getTextureManager(), new AssetBitmapTextureAtlasSource(this, "grass3.png")) {
             public void onDraw(GL10 pGL, Camera pCamera) {
                 pGL.glPushMatrix();
 
@@ -138,11 +152,17 @@ public class Game extends BaseChasingCarActivity implements Scene.IOnSceneTouchL
 
         mPlayers.add(mThisPlayer);
 
-        Line line1 = new Line(-40, -40, MAP_WIDTH - CAMERA_WIDTH/2 + 40, -40);
-        Line line2 = new Line(-40, -40, -40, MAP_WIDTH - CAMERA_WIDTH/2 + 40);
+        Line line1 = new Line(-40,                            -40,
+                             MAP_WIDTH - CAMERA_WIDTH/2 + 40, -40);
 
-        Line line3 = new Line(-40, MAP_HEIGHT - CAMERA_HEIGHT/2 + 40, MAP_WIDTH - CAMERA_WIDTH/2 + 40, MAP_HEIGHT - CAMERA_HEIGHT/2 + 40);
-        Line line4 = new Line(MAP_WIDTH - CAMERA_WIDTH/2 + 40, -40, MAP_WIDTH - CAMERA_WIDTH/2 + 40, MAP_HEIGHT - CAMERA_HEIGHT/2 + 40);
+        Line line2 = new Line(-40,                            -40,
+                              -40, MAP_HEIGHT - CAMERA_HEIGHT/2 + 40);
+
+        Line line3 = new Line(MAP_WIDTH - CAMERA_WIDTH/2 + 40, MAP_HEIGHT - CAMERA_HEIGHT/2 + 40,
+                -40,                             MAP_HEIGHT - CAMERA_HEIGHT/2 + 40);
+
+        Line line4 = new Line(MAP_WIDTH - CAMERA_WIDTH/2 + 40, MAP_HEIGHT - CAMERA_HEIGHT/2 + 40,
+                              MAP_WIDTH - CAMERA_WIDTH/2 + 40, -40);
 
         line1.setColor(0, 0, 0);
         line2.setColor(0, 0, 0);
